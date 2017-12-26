@@ -11,9 +11,9 @@ import (
 	"log"
 	"net/url"
 	"os"
-
-	types "github.com/ukcloud/govcloudair/types/v56"
 	"strconv"
+
+	types "github.com/stasian/govcloudair/types/v56"
 )
 
 type VApp struct {
@@ -649,6 +649,7 @@ func (v *VApp) ChangeCPUcount(size int) (Task, error) {
 		XmlnsRasd:       "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData",
 		XmlnsVCloud:     "http://www.vmware.com/vcloud/v1.5",
 		XmlnsXsi:        "http://www.w3.org/2001/XMLSchema-instance",
+		XmlnsVmw:        "http://www.vmware.com/schema/ovf",
 		VCloudHREF:      v.VApp.Children.VM[0].HREF + "/virtualHardwareSection/cpu",
 		VCloudType:      "application/vnd.vmware.vcloud.rasdItem+xml",
 		AllocationUnits: "hertz * 10^6",
@@ -658,6 +659,7 @@ func (v *VApp) ChangeCPUcount(size int) (Task, error) {
 		Reservation:     0,
 		ResourceType:    3,
 		VirtualQuantity: size,
+		CoresPerSocket:  size,
 		Weight:          0,
 		Link: &types.Link{
 			HREF: v.VApp.Children.VM[0].HREF + "/virtualHardwareSection/cpu",
@@ -700,6 +702,50 @@ func (v *VApp) ChangeCPUcount(size int) (Task, error) {
 	// The request was successful
 	return *task, nil
 
+}
+
+func (v *VApp) ChangeNestedHypervisor(value bool) (Task, error) {
+	err := v.Refresh()
+	if err != nil {
+		return Task{}, fmt.Errorf("error refreshing vapp before running customization: %v", err)
+	}
+
+	// Check if VApp Children is populated
+	if v.VApp.Children == nil {
+		return Task{}, fmt.Errorf("vApp doesn't contain any children, aborting customization")
+	}
+
+	log.Printf("[DEBUG] Nested Hypervisor is: %t", v.VApp.Children.VM[0].NestedHypervisorEnabled)
+
+	b := bytes.NewBufferString(xml.Header)
+
+	s, _ := url.ParseRequestURI(v.VApp.Children.VM[0].HREF)
+
+	if value {
+		s.Path += "/action/enableNestedHypervisor"
+	} else {
+		s.Path += "/action/disableNestedHypervisor"
+	}
+
+	log.Printf("[DEBUG] URL for NestedHypervisor setting: %s", s)
+
+	req := v.c.NewRequest(map[string]string{}, "POST", *s, b)
+
+	req.Header.Add("Content-Type", "application/vnd.vmware.vcloud.vm+xml")
+
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return Task{}, fmt.Errorf("error customizing VM: %s", err)
+	}
+
+	task := NewTask(v.c)
+
+	if err = decodeBody(resp, task.Task); err != nil {
+		return Task{}, fmt.Errorf("error decoding Task response: %s", err)
+	}
+
+	// The request was successful
+	return *task, nil
 }
 
 func (v *VApp) ChangeStorageProfile(name string) (Task, error) {
@@ -1035,6 +1081,7 @@ func (v *VApp) ChangeMemorySize(size int) (Task, error) {
 		XmlnsRasd:       "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData",
 		XmlnsVCloud:     "http://www.vmware.com/vcloud/v1.5",
 		XmlnsXsi:        "http://www.w3.org/2001/XMLSchema-instance",
+		XmlnsVmw:        "http://www.vmware.com/schema/ovf",
 		VCloudHREF:      v.VApp.Children.VM[0].HREF + "/virtualHardwareSection/memory",
 		VCloudType:      "application/vnd.vmware.vcloud.rasdItem+xml",
 		AllocationUnits: "byte * 2^20",
