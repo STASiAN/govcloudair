@@ -1020,6 +1020,7 @@ type OVFItem struct {
 	XMLName         xml.Name `xml:"vcloud:Item"`
 	XmlnsRasd       string   `xml:"xmlns:rasd,attr"`
 	XmlnsVCloud     string   `xml:"xmlns:vcloud,attr"`
+	XmlnsVmw        string   `xml:"xmlns:vmw,attr"`
 	XmlnsXsi        string   `xml:"xmlns:xsi,attr"`
 	VCloudHREF      string   `xml:"vcloud:href,attr"`
 	VCloudType      string   `xml:"vcloud:type,attr"`
@@ -1031,6 +1032,7 @@ type OVFItem struct {
 	ResourceType    int      `xml:"rasd:ResourceType"`
 	VirtualQuantity int      `xml:"rasd:VirtualQuantity"`
 	Weight          int      `xml:"rasd:Weight"`
+	CoresPerSocket  int      `xml:"vmw:CoresPerSocket"`
 	Link            *Link    `xml:"vcloud:Link"`
 }
 

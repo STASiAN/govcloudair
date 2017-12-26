@@ -173,6 +173,7 @@ func (v *VM) ChangeCPUcount(size int) (Task, error) {
 		XmlnsRasd:       "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData",
 		XmlnsVCloud:     "http://www.vmware.com/vcloud/v1.5",
 		XmlnsXsi:        "http://www.w3.org/2001/XMLSchema-instance",
+		XmlnsVmw:        "http://www.vmware.com/schema/ovf",
 		VCloudHREF:      v.VM.HREF + "/virtualHardwareSection/cpu",
 		VCloudType:      "application/vnd.vmware.vcloud.rasdItem+xml",
 		AllocationUnits: "hertz * 10^6",
@@ -182,6 +183,7 @@ func (v *VM) ChangeCPUcount(size int) (Task, error) {
 		Reservation:     0,
 		ResourceType:    3,
 		VirtualQuantity: size,
+		CoresPerSocket:  size,
 		Weight:          0,
 		Link: &types.Link{
 			HREF: v.VM.HREF + "/virtualHardwareSection/cpu",
@@ -318,6 +320,7 @@ func (v *VM) ChangeMemorySize(size int) (Task, error) {
 		XmlnsRasd:       "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData",
 		XmlnsVCloud:     "http://www.vmware.com/vcloud/v1.5",
 		XmlnsXsi:        "http://www.w3.org/2001/XMLSchema-instance",
+		XmlnsVmw:        "http://www.vmware.com/schema/ovf",
 		VCloudHREF:      v.VM.HREF + "/virtualHardwareSection/memory",
 		VCloudType:      "application/vnd.vmware.vcloud.rasdItem+xml",
 		AllocationUnits: "byte * 2^20",
