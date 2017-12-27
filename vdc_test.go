@@ -5,10 +5,11 @@
 package govcloudair
 
 import (
-	"github.com/ukcloud/govcloudair/testutil"
+	"github.com/stasian/govcloudair/testutil"
+
+	"strconv"
 
 	. "gopkg.in/check.v1"
-	"strconv"
 )
 
 func (s *S) Test_FindVDCNetwork(c *C) {

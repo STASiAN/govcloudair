@@ -5,8 +5,8 @@
 package govcloudair
 
 import (
-	"github.com/ukcloud/govcloudair/testutil"
-	"github.com/ukcloud/govcloudair/types/v56"
+	"github.com/stasian/govcloudair/testutil"
+	"github.com/stasian/govcloudair/types/v56"
 
 	. "gopkg.in/check.v1"
 )

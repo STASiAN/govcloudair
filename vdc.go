@@ -8,11 +8,12 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	types "github.com/ukcloud/govcloudair/types/v56"
 	"log"
 	"net/url"
 	"os"
 	"strings"
+
+	types "github.com/stasian/govcloudair/types/v56"
 )
 
 type Vdc struct {

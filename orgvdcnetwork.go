@@ -8,13 +8,14 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	types "github.com/ukcloud/govcloudair/types/v56"
 	"log"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
 	"time"
+
+	types "github.com/stasian/govcloudair/types/v56"
 )
 
 // OrgVDCNetwork an org vdc network client
