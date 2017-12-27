@@ -298,6 +298,7 @@ type InstantiationParams struct {
 	NetworkConfigSection         *NetworkConfigSection         `xml:"NetworkConfigSection,omitempty"`
 	NetworkConnectionSection     *NetworkConnectionSection     `xml:"NetworkConnectionSection,omitempty"`
 	ProductSection               *ProductSection               `xml:"ProductSection,omitempty"`
+	VirtualHardwareSection       *VirtualHardwareSection       `xml:"VirtualHardwareSection,omitempty"`
 	// TODO: Not Implemented
 	// SnapshotSection              SnapshotSection              `xml:"SnapshotSection,omitempty"`
 }
@@ -893,8 +894,12 @@ type VAppTemplate struct {
 	// referenced by VAppTemplateType).
 	NetworkConfigSection     *NetworkConfigSection     `xml:"NetworkConfigSection,omitempty"`
 	NetworkConnectionSection *NetworkConnectionSection `xml:"NetworkConnectionSection,omitempty"`
-	LeaseSettingsSection     *LeaseSettingsSection     `xml:"LeaseSettingsSection,omitempty"`
-	CustomizationSection     *CustomizationSection     `xml:"CustomizationSection,omitempty"`
+
+	// Section ovf:VirtualHardwareSection
+	VirtualHardwareSection *VirtualHardwareSection `xml:"VirtualHardwareSection,omitempty"`
+
+	LeaseSettingsSection *LeaseSettingsSection `xml:"LeaseSettingsSection,omitempty"`
+	CustomizationSection *CustomizationSection `xml:"CustomizationSection,omitempty"`
 	// OVF Section needs to be added
 	// Section               Section              `xml:"Section,omitempty"`
 }

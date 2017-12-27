@@ -60,7 +60,7 @@ func (v *VApp) Refresh() error {
 	return nil
 }
 
-func (v *VApp) AddVM(orgvdcnetworks []*types.OrgVDCNetwork, vapptemplate VAppTemplate, name string) (Task, error) {
+func (v *VApp) AddVM(orgvdcnetworks []*types.OrgVDCNetwork, vapptemplate VAppTemplate, name string, storages []*types.VirtualHardwareItem) (Task, error) {
 
 	vcomp := &types.ReComposeVAppParams{
 		Ovf:         "http://schemas.dmtf.org/ovf/envelope/1",
@@ -81,6 +81,11 @@ func (v *VApp) AddVM(orgvdcnetworks []*types.OrgVDCNetwork, vapptemplate VAppTem
 					HREF: vapptemplate.VAppTemplate.Children.VM[0].NetworkConnectionSection.HREF,
 					Info: "Network config for sourced item",
 					PrimaryNetworkConnectionIndex: vapptemplate.VAppTemplate.Children.VM[0].NetworkConnectionSection.PrimaryNetworkConnectionIndex,
+				},
+				VirtualHardwareSection: &types.VirtualHardwareSection{
+					Type: vapptemplate.VAppTemplate.Children.VM[0].VirtualHardwareSection.Type,
+					HREF: vapptemplate.VAppTemplate.Children.VM[0].VirtualHardwareSection.HREF,
+					Info: "Virtual Hardware config for sourced item",
 				},
 			},
 		},
@@ -103,6 +108,21 @@ func (v *VApp) AddVM(orgvdcnetworks []*types.OrgVDCNetwork, vapptemplate VAppTem
 		)
 	}
 	log.Printf("%s", vcomp.SourcedItem.InstantiationParams.NetworkConnectionSection.NetworkConnection)
+
+	if len(storages) > 0 {
+		for _, storage := range storages {
+			vcomp.SourcedItem.InstantiationParams.VirtualHardwareSection.Item = append(vcomp.SourcedItem.InstantiationParams.VirtualHardwareSection.Item,
+				&types.VirtualHardwareItem{
+					ElementName:     storage.ElementName,
+					Description:     storage.Description,
+					HostResource:    storage.HostResource,
+					ResourceType:    storage.ResourceType,
+					ResourceSubType: storage.ResourceSubType,
+				},
+			)
+		}
+		log.Printf("%s", vcomp.SourcedItem.InstantiationParams.VirtualHardwareSection.Item)
+	}
 
 	output, _ := xml.MarshalIndent(vcomp, "  ", "    ")
 
