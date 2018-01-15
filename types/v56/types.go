@@ -996,6 +996,7 @@ type VirtualHardwareConnection struct {
 
 // HostResource info from ResourceType=17 (Hard Disk)
 type VirtualHardwareHostResource struct {
+	Xmlns             string `xml:"xmlns,attr,omitempty"`
 	BusType           int    `xml:"busType,attr,omitempty"`
 	BusSubType        string `xml:"busSubType,attr,omitempty"`
 	Capacity          int    `xml:"capacity,attr,omitempty"`
@@ -1020,25 +1021,38 @@ type SnapshotItem struct {
 	Size      int    `xml:"size,attr,omitempty"`
 }
 
+type RasdItemsList struct {
+	XMLName     xml.Name `xml:"RasdItemsList"`
+	Xmlns       string   `xml:"xmlns,attr"`
+	XmlnsVCloud string   `xml:"xmlns:vcloud,attr"`
+	XmlnsRasd   string   `xml:"xmlns:rasd,attr"`
+	Type        string   `xml:"type,attr"`
+	Items       []OVFItem
+}
+
 // OVFItem is a horrible kludge to process OVF, needs to be fixed with proper types.
 type OVFItem struct {
-	XMLName         xml.Name `xml:"vcloud:Item"`
-	XmlnsRasd       string   `xml:"xmlns:rasd,attr"`
-	XmlnsVCloud     string   `xml:"xmlns:vcloud,attr"`
-	XmlnsVmw        string   `xml:"xmlns:vmw,attr"`
-	XmlnsXsi        string   `xml:"xmlns:xsi,attr"`
-	VCloudHREF      string   `xml:"vcloud:href,attr"`
-	VCloudType      string   `xml:"vcloud:type,attr"`
-	AllocationUnits string   `xml:"rasd:AllocationUnits"`
+	XMLName         xml.Name `xml:"Item"`
+	XmlnsRasd       string   `xml:"xmlns:rasd,attr,omitempty"`
+	XmlnsVCloud     string   `xml:"xmlns:vcloud,attr,omitempty"`
+	XmlnsVmw        string   `xml:"xmlns:vmw,attr,omitempty"`
+	XmlnsXsi        string   `xml:"xmlns:xsi,attr,omitempty"`
+	VCloudHREF      string   `xml:"vcloud:href,attr,omitempty"`
+	VCloudType      string   `xml:"vcloud:type,attr,omitempty"`
+	AllocationUnits string   `xml:"rasd:AllocationUnits,omitempty"`
 	Description     string   `xml:"rasd:Description"`
 	ElementName     string   `xml:"rasd:ElementName"`
-	InstanceID      int      `xml:"rasd:InstanceID"`
-	Reservation     int      `xml:"rasd:Reservation"`
+	InstanceID      int      `xml:"rasd:InstanceID,omitempty"`
+	Reservation     int      `xml:"rasd:Reservation,omitempty"`
 	ResourceType    int      `xml:"rasd:ResourceType"`
-	VirtualQuantity int      `xml:"rasd:VirtualQuantity"`
-	Weight          int      `xml:"rasd:Weight"`
-	CoresPerSocket  int      `xml:"vmw:CoresPerSocket"`
-	Link            *Link    `xml:"vcloud:Link"`
+	ResourceSubType string   `xml:"rasd:ResourceSubType,omitempty"`
+	VirtualQuantity int      `xml:"rasd:VirtualQuantity,omitempty"`
+	Weight          int      `xml:"rasd:Weight,omitempty"`
+	CoresPerSocket  int      `xml:"vmw:CoresPerSocket,omitempty"`
+	Link            *Link    `xml:"vcloud:Link,omitempty"`
+
+	HostResource []*VirtualHardwareHostResource `xml:"HostResource,omitempty"`
+	Address      int                            `xml:"rasd:Address"`
 }
 
 // DeployVAppParams are the parameters to a deploy vApp request

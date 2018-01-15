@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -396,6 +397,103 @@ func (v *VM) ChangeMemorySize(size int) (Task, error) {
 	req := v.c.NewRequest(map[string]string{}, "PUT", *s, b)
 
 	req.Header.Add("Content-Type", "application/vnd.vmware.vcloud.rasdItem+xml")
+
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return Task{}, fmt.Errorf("error customizing VM: %s", err)
+	}
+
+	task := NewTask(v.c)
+
+	if err = decodeBody(resp, task.Task); err != nil {
+		return Task{}, fmt.Errorf("error decoding Task response: %s", err)
+	}
+
+	// The request was successful
+	return *task, nil
+
+}
+
+func (v *VM) FindStorages() (*types.RasdItemsList, error) {
+
+	s, err := url.ParseRequestURI(v.VM.HREF)
+	s.Path += "/virtualHardwareSection/disks"
+
+	if err != nil {
+		return nil, fmt.Errorf("error decoding vm HREF: %s", err)
+	}
+
+	// Querying the VApp
+	req := v.c.NewRequest(map[string]string{}, "GET", *s, nil)
+
+	// req.Header.Add("Content-Type", "application/vnd.vmware.vcloud.rasditemslist+xml")
+
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving VM: %s", err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(body))
+
+	rasd := &types.RasdItemsList{}
+
+	if err = decodeBody(resp, rasd); err != nil {
+		return nil, fmt.Errorf("error decoding VM response: %s", err)
+	}
+
+	return rasd, nil
+}
+
+func (v *VM) ChangeStorages(storages []types.VirtualHardwareItem) (Task, error) {
+
+	err := v.Refresh()
+	if err != nil {
+		return Task{}, fmt.Errorf("error refreshing VM before running customization: %v", err)
+	}
+
+	items := make([]types.OVFItem, 0)
+	for i, storage := range storages {
+		newitem := types.OVFItem{
+			Address:         i + 1,
+			Description:     storage.Description,
+			ElementName:     storage.ElementName,
+			ResourceType:    storage.ResourceType,
+			VirtualQuantity: storage.VirtualQuantity,
+			// ResourceSubType: storage.ResourceSubType,
+			HostResource: storage.HostResource,
+			InstanceID:   i + 1,
+		}
+		items = append(items, newitem)
+	}
+
+	list := types.RasdItemsList{
+		Type:        "application/vnd.vmware.vcloud.rasdItemsList+xml",
+		XmlnsRasd:   "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData",
+		Xmlns:       "http://www.vmware.com/vcloud/v1.5",
+		XmlnsVCloud: "http://www.vmware.com/vcloud/v1.5",
+		Items:       items,
+	}
+
+	output, err := xml.MarshalIndent(list, "  ", "    ")
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+	}
+
+	debug := os.Getenv("GOVCLOUDAIR_DEBUG")
+
+	if debug == "true" {
+		fmt.Printf("\n\nXML DEBUG: %s\n\n", string(output))
+	}
+
+	b := bytes.NewBufferString(xml.Header + string(output))
+
+	s, _ := url.ParseRequestURI(v.VM.HREF)
+	s.Path += "/virtualHardwareSection/disks"
+
+	req := v.c.NewRequest(map[string]string{}, "PUT", *s, b)
+
+	req.Header.Add("Content-Type", "application/vnd.vmware.vcloud.rasditemslist+xml")
 
 	resp, err := checkResp(v.c.Http.Do(req))
 	if err != nil {
