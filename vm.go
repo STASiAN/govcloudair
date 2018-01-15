@@ -453,16 +453,16 @@ func (v *VM) ChangeStorages(storages []types.VirtualHardwareItem) (Task, error) 
 	}
 
 	items := make([]types.OVFItem, 0)
-	for i, storage := range storages {
+	for _, storage := range storages {
 		newitem := types.OVFItem{
-			Address:         i + 1,
+			Address:         storage.Address,
 			Description:     storage.Description,
 			ElementName:     storage.ElementName,
 			ResourceType:    storage.ResourceType,
 			VirtualQuantity: storage.VirtualQuantity,
-			// ResourceSubType: storage.ResourceSubType,
-			HostResource: storage.HostResource,
-			InstanceID:   i + 1,
+			ResourceSubType: storage.ResourceSubType,
+			HostResource:    storage.HostResource,
+			InstanceID:      storage.InstanceID,
 		}
 		items = append(items, newitem)
 	}
